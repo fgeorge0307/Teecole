@@ -31,57 +31,34 @@ const resetAdmin = async () => {
     // Hash the password
     const hash = await bcrypt.hash(password, saltRounds);
     
-    // Check if admin exists
-    db.get('SELECT id FROM admin_users WHERE username = ?', [username], (err, row) => {
+    // First, delete any existing admin users to start fresh
+    db.run('DELETE FROM admin_users', (err) => {
       if (err) {
-        console.error('❌ Error checking admin:', err.message);
+        console.error('❌ Error clearing admin users:', err.message);
         db.close();
         process.exit(1);
       }
 
-      if (row) {
-        // Update existing admin
-        db.run(
-          'UPDATE admin_users SET password = ?, email = ? WHERE username = ?',
-          [hash, email, username],
-          function(err) {
-            if (err) {
-              console.error('❌ Error updating admin:', err.message);
-              db.close();
-              process.exit(1);
-            }
-            console.log('✅ Admin user updated successfully');
-            console.log('');
-            console.log('Login credentials:');
-            console.log('  Username:', username);
-            console.log('  Password:', password);
-            console.log('');
-            console.log('⚠️  IMPORTANT: Change this password after logging in!');
+      // Create new admin
+      db.run(
+        'INSERT INTO admin_users (username, password, email, role) VALUES (?, ?, ?, ?)',
+        [username, hash, email, 'admin'],
+        function(err) {
+          if (err) {
+            console.error('❌ Error creating admin:', err.message);
             db.close();
+            process.exit(1);
           }
-        );
-      } else {
-        // Create new admin
-        db.run(
-          'INSERT INTO admin_users (username, password, email, role) VALUES (?, ?, ?, ?)',
-          [username, hash, email, 'admin'],
-          function(err) {
-            if (err) {
-              console.error('❌ Error creating admin:', err.message);
-              db.close();
-              process.exit(1);
-            }
-            console.log('✅ Admin user created successfully');
-            console.log('');
-            console.log('Login credentials:');
-            console.log('  Username:', username);
-            console.log('  Password:', password);
-            console.log('');
-            console.log('⚠️  IMPORTANT: Change this password after logging in!');
-            db.close();
-          }
-        );
-      }
+          console.log('✅ Admin user created successfully');
+          console.log('');
+          console.log('Login credentials:');
+          console.log('  Username:', username);
+          console.log('  Password:', password);
+          console.log('');
+          console.log('⚠️  IMPORTANT: Keep these credentials secure!');
+          db.close();
+        }
+      );
     });
   } catch (error) {
     console.error('❌ Error hashing password:', error.message);
