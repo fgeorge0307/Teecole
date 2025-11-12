@@ -1,0 +1,54 @@
+steps:
+  # Install backend dependencies
+  - name: 'node:18'
+    entrypoint: npm
+    args: ['install']
+    dir: 'backend'
+  
+  # Install frontend dependencies
+  - name: 'node:18'
+    entrypoint: npm
+    args: ['install']
+    dir: 'frontend'
+  
+  # Build frontend
+  - name: 'node:18'
+    entrypoint: npm
+    args: ['run', 'build']
+    dir: 'frontend'
+    env:
+      - 'REACT_APP_API_URL=/api'
+  
+  # Deploy to Compute Engine VM
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - compute
+      - ssh
+      - teecole-server
+      - --zone=us-central1-a
+      - --command=
+      - |
+        set -e
+        cd /home/ubuntu/teecole || exit 1
+        git pull origin main
+        
+        # Update backend
+        cd backend
+        npm install --production
+        pm2 restart teecole-backend || pm2 start src/server.js --name teecole-backend
+        
+        # Update frontend
+        cd ../frontend
+        npm install
+        npm run build
+        
+        # Restart Nginx
+        sudo systemctl restart nginx
+        
+        echo "✅ Deployment completed"
+
+timeout: '1200s'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'N1_HIGHCPU_8'

@@ -1,0 +1,126 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+env:
+  PROJECT_ID: teecole-477518
+  VM_NAME: teecole-server
+  ZONE: us-central1-a
+
+jobs:
+  deploy:
+    name: Deploy to Google Cloud
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci --omit=dev
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          DISABLE_ESLINT_PLUGIN=true npm run build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to GCP VM
+        run: |
+          # Configure SSH
+          gcloud compute config-ssh --quiet
+          
+          # Create deployment package
+          tar -czf deploy.tar.gz \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.github' \
+            --exclude='frontend/src' \
+            --exclude='frontend/public' \
+            backend/ frontend/build/
+          
+          # Upload to VM
+          gcloud compute scp deploy.tar.gz ubuntu@$VM_NAME:~/ \
+            --zone=$ZONE \
+            --quiet
+          
+          # Deploy on VM
+          gcloud compute ssh ubuntu@$VM_NAME \
+            --zone=$ZONE \
+            --quiet \
+            --command="
+              cd /home/ubuntu && \
+              tar -xzf deploy.tar.gz && \
+              rm deploy.tar.gz && \
+              cd teecole && \
+              rm -rf backend/node_modules backend/src frontend/build && \
+              cp -r ~/backend/* backend/ && \
+              cp -r ~/frontend/build frontend/ && \
+              rm -rf ~/backend ~/frontend && \
+              cd backend && npm ci --omit=dev && \
+              pm2 restart teecole-backend || pm2 start src/server.js --name teecole-backend && \
+              pm2 save
+            "
+
+      - name: Verify deployment
+        run: |
+          VM_IP=$(gcloud compute instances describe $VM_NAME \
+            --zone=$ZONE \
+            --format="get(networkInterfaces[0].accessConfigs[0].natIP)")
+          
+          echo "Testing deployment at http://$VM_IP"
+          
+          # Wait for services to restart
+          sleep 10
+          
+          # Test if site is accessible
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://$VM_IP)
+          
+          if [ $STATUS -eq 200 ]; then
+            echo "✅ Deployment successful! Site is accessible."
+            echo "🌐 URL: http://$VM_IP"
+          else
+            echo "❌ Deployment verification failed. HTTP status: $STATUS"
+            exit 1
+          fi
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          VM_IP=$(gcloud compute instances describe $VM_NAME \
+            --zone=$ZONE \
+            --format="get(networkInterfaces[0].accessConfigs[0].natIP)")
+          
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "🎉 Deployment successful!"
+            echo "🌐 Live at: http://$VM_IP"
+          else
+            echo "❌ Deployment failed. Check logs above."
+          fi

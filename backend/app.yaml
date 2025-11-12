@@ -1,0 +1,29 @@
+runtime: nodejs18
+
+env: standard
+
+instance_class: F1
+
+automatic_scaling:
+  min_instances: 1
+  max_instances: 10
+  target_cpu_utilization: 0.65
+
+handlers:
+- url: /api/.*
+  script: auto
+  secure: always
+
+- url: /uploads/.*
+  static_dir: uploads
+  secure: always
+  expiration: "1d"
+
+- url: /.*
+  static_files: ../frontend/build/index.html
+  upload: ../frontend/build/.*
+  secure: always
+
+env_variables:
+  NODE_ENV: "production"
+  PORT: "8080"

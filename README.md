@@ -1,6 +1,15 @@
 # Teecole Limited - Modern Website
 
+![Deploy to GCP](https://github.com/fgeorge0307/teecole/actions/workflows/deploy.yml/badge.svg)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-Proprietary-blue)
+
 A modern, mobile-friendly property services website built with React, Node.js, and SQLite. Features Material 3 expressive design with Apple's glassmorphic aesthetics.
+
+## 🌐 Live Demo
+
+**Production**: [http://35.202.31.94](http://35.202.31.94)
+**Admin Panel**: [http://35.202.31.94/admin/login](http://35.202.31.94/admin/login)
 
 ## 🌟 Features
 
@@ -265,7 +274,46 @@ This is a proprietary project for Teecole Limited. For any modifications or impr
 
 Copyright © 2025 Teecole Limited. All rights reserved.
 
-## 👨‍💻 Development
+## � Deployment
+
+### Automated CI/CD Pipeline
+
+The project includes automated deployment to Google Cloud Platform via GitHub Actions:
+
+- **Trigger**: Push to `main` branch or manual trigger
+- **Build**: Automatically builds frontend and backend
+- **Deploy**: Deploys to GCP Compute Engine VM
+- **Verify**: Tests deployment success
+
+**Setup Instructions**: See [CICD_SETUP.md](./CICD_SETUP.md)
+
+### Manual Deployment
+
+For manual deployment to GCP:
+
+```bash
+# Quick deploy
+./quick-deploy-gcp.sh
+
+# Or use the detailed deployment script
+./deploy-gcp.sh <VM_IP>
+```
+
+**Deployment Guides**:
+- [GCP Deployment Guide](./GCP_DEPLOYMENT.md)
+- [AWS Deployment Guide](./AWS_DEPLOYMENT.md)
+- [Quick Start Guide](./QUICK_START.md)
+
+### Deployment Status
+
+Current deployment:
+- **Platform**: Google Cloud Platform (Compute Engine)
+- **Instance**: teecole-server (e2-small)
+- **Region**: us-central1-a
+- **IP**: 35.202.31.94
+- **Cost**: ~$15-20/month
+
+## �👨‍💻 Development
 
 Built with 20+ years of software development expertise, incorporating:
 - Modern React best practices

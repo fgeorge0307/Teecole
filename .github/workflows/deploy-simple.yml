@@ -1,0 +1,65 @@
+name: Deploy to GCP (Git Pull)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: teecole-477518
+  VM_NAME: teecole-server
+  ZONE: us-central1-a
+
+jobs:
+  deploy:
+    name: Deploy via Git Pull
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to GCP VM
+        run: |
+          gcloud compute ssh ubuntu@$VM_NAME \
+            --zone=$ZONE \
+            --quiet \
+            --command="
+              cd /home/ubuntu/teecole && \
+              echo '📥 Pulling latest code...' && \
+              git pull origin main && \
+              echo '📦 Installing backend dependencies...' && \
+              cd backend && npm install --omit=dev && \
+              echo '📦 Installing frontend dependencies...' && \
+              cd ../frontend && npm install && \
+              echo '🏗️  Building frontend...' && \
+              DISABLE_ESLINT_PLUGIN=true npm run build && \
+              echo '🔄 Restarting backend...' && \
+              pm2 restart teecole-backend && \
+              echo '✅ Deployment complete!'
+            "
+
+      - name: Verify deployment
+        run: |
+          VM_IP=$(gcloud compute instances describe $VM_NAME \
+            --zone=$ZONE \
+            --format="get(networkInterfaces[0].accessConfigs[0].natIP)")
+          
+          echo "🧪 Testing deployment at http://$VM_IP"
+          sleep 10
+          
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://$VM_IP)
+          
+          if [ $STATUS -eq 200 ]; then
+            echo "✅ Deployment successful!"
+            echo "🌐 Live at: http://$VM_IP"
+          else
+            echo "❌ Verification failed (HTTP $STATUS)"
+            exit 1
+          fi

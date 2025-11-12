@@ -42,7 +42,7 @@ const Contact = () => {
       await axios.post('http://localhost:5001/api/contact', formData);
       setSnackbar({
         open: true,
-        message: 'Message sent successfully! We\'ll get back to you soon.',
+        message: 'Thanks we will get back to you as quickly as possible',
         severity: 'success',
       });
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
