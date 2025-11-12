@@ -8,7 +8,10 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'teecole.db');
+// Use the same path as db.js
+const dbPath = path.join(__dirname, 'src/database/teecole.db');
+
+console.log('Database path:', dbPath);
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
