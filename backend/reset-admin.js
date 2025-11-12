@@ -22,8 +22,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 const resetAdmin = async () => {
-  const username = 'admin';
-  const password = 'admin123';
+  const username = 'Teecole';
+  const password = 'Teecole5253';
   const email = 'admin@teecoleltd.com';
   const saltRounds = 10;
 

@@ -177,8 +177,9 @@ const seedAdmin = () => {
       const bcrypt = require('bcrypt');
       const saltRounds = 10;
       
-      // Default admin credentials - CHANGE IN PRODUCTION!
-      const defaultPassword = 'admin123';
+      // Default admin credentials
+      const defaultUsername = 'Teecole';
+      const defaultPassword = 'Teecole5253';
       
       bcrypt.hash(defaultPassword, saltRounds, (err, hash) => {
         if (err) {
@@ -189,11 +190,11 @@ const seedAdmin = () => {
         db.run(`
           INSERT INTO admin_users (username, password, email, role)
           VALUES (?, ?, ?, ?)
-        `, ['admin', hash, 'admin@teecoleltd.com', 'admin'], (err) => {
+        `, [defaultUsername, hash, 'admin@teecoleltd.com', 'admin'], (err) => {
           if (err) {
             console.error('Error creating default admin:', err.message);
           } else {
-            console.log('Default admin created (username: admin, password: admin123)');
+            console.log(`Default admin created (username: ${defaultUsername})`);
             console.log('⚠️  IMPORTANT: Change the admin password after first login!');
           }
         });
