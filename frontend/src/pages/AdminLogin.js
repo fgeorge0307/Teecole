@@ -150,12 +150,6 @@ const AdminLogin = () => {
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
-
-            <Box sx={{ mt: 3, p: 2, background: 'rgba(103, 80, 164, 0.05)', borderRadius: 2 }}>
-              <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-                Default credentials: username: <strong>admin</strong>, password: <strong>admin123</strong>
-              </Typography>
-            </Box>
           </Paper>
         </motion.div>
       </Container>

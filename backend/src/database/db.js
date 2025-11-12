@@ -194,9 +194,12 @@ const seedAdmin = () => {
             console.error('Error creating default admin:', err.message);
           } else {
             console.log('Default admin created (username: admin, password: admin123)');
+            console.log('⚠️  IMPORTANT: Change the admin password after first login!');
           }
         });
       });
+    } else {
+      console.log('Admin user already exists');
     }
   });
 };
