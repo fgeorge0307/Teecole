@@ -1,30 +1,6 @@
 # Teecole Limited - Modern Website
 
-![Deploy to GCP](https://github.com/fgeorge0307/teecole/actions/workflows/deploy.yml/badge.svg)
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![License](https://img.shields.io/badge/license-Proprietary-blue)
 
-A modern, mobile-friendly property services website built with React, Node.js, and SQLite. Features Material 3 expressive design with Apple's glassmorphic aesthetics.
-
-## 🌐 Live Demo
-
-**Production**: [http://35.202.31.94](http://35.202.31.94)
-**Admin Panel**: [http://35.202.31.94/admin/login](http://35.202.31.94/admin/login)
-
-## 🌟 Features
-
-- **Modern UI/UX**: Material 3 design with glassmorphic effects
-- **Fully Responsive**: Mobile-first design approach
-- **Smooth Animations**: Framer Motion for fluid interactions
-- **Professional Typography**: Josefin Sans font family
-- **Backend API**: RESTful API with Node.js and Express
-- **Database**: SQLite for efficient data management
-- **Contact Form**: Functional contact submission system
-- **Services Management**: Dynamic service showcase
-- **Admin Dashboard**: Secure login and gallery management
-- **Project Gallery**: Public gallery with category filtering
-- **Image Upload**: Admin can upload and manage project images
-- **Featured Projects**: Showcase featured work on homepage
 
 ## 🛠️ Tech Stack
 
@@ -44,39 +20,7 @@ A modern, mobile-friendly property services website built with React, Node.js, a
 - Body Parser
 - Dotenv
 
-## 📁 Project Structure
 
-```
-teecole/
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.js
-│   │   │   ├── Hero.js
-│   │   │   ├── Services.js
-│   │   │   ├── About.js
-│   │   │   ├── Contact.js
-│   │   │   └── Footer.js
-│   │   ├── services/
-│   │   │   └── api.js
-│   │   ├── App.js
-│   │   ├── index.js
-│   │   ├── theme.js
-│   │   └── index.css
-│   └── package.json
-│
-└── backend/
-    ├── src/
-    │   ├── controllers/
-    │   │   └── apiController.js
-    │   ├── database/
-    │   │   └── db.js
-    │   ├── routes/
-    │   │   └── api.js
-    │   └── server.js
-    └── package.json
-```
 
 ## 🚀 Getting Started
 
@@ -189,82 +133,9 @@ The website is fully responsive with breakpoints for:
 - Tablet: 600px - 960px
 - Desktop: > 960px
 
-All components adapt seamlessly across devices.
 
-## 🔧 Configuration
 
-### Environment Variables
 
-**Backend** (`.env`):
-```
-PORT=5000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
-```
-
-**Frontend** (`.env`):
-```
-REACT_APP_API_URL=http://localhost:5000/api
-```
-
-## 📄 Database Schema
-
-### Services Table
-```sql
-- id: INTEGER PRIMARY KEY
-- title: TEXT
-- description: TEXT
-- icon: TEXT
-- color: TEXT
-- features: TEXT (JSON)
-- image_url: TEXT
-- created_at: DATETIME
-```
-
-### Contact Submissions Table
-```sql
-- id: INTEGER PRIMARY KEY
-- name: TEXT
-- email: TEXT
-- phone: TEXT
-- subject: TEXT
-- message: TEXT
-- status: TEXT
-- created_at: DATETIME
-```
-
-## 🎯 Services Offered
-
-1. **Property Redesign and Refurbishment**
-   - Design & Build Service
-   - Residential & Commercial
-   - Project Management
-   - Quality Finish
-
-2. **Property Sales and Management**
-   - Investment Properties
-   - Best Market Rates
-   - Mortgage Options
-   - Management Packages
-
-3. **Cleaning Services**
-   - Commercial Cleaning
-   - Industrial Spaces
-   - Medical Facilities
-   - 100% Satisfaction
-
-4. **AirBnB Hosting & Management** ✨ NEW
-   - Full Property Management
-   - Guest Communication
-   - Professional Photography
-   - 24/7 Support
-
-## 📞 Contact Information
-
-**Teecole Limited**
-- Address: Office 9, Dalton House, 60 Windsor Avenue, London, SW19 2RR, United Kingdom
-- Phone: +44 1293 859148
-- Email: info@teecoleltd.com
 
 ## 🤝 Contributing
 
@@ -274,55 +145,8 @@ This is a proprietary project for Teecole Limited. For any modifications or impr
 
 Copyright © 2025 Teecole Limited. All rights reserved.
 
-## � Deployment
 
-### Automated CI/CD Pipeline
 
-The project includes automated deployment to Google Cloud Platform via GitHub Actions:
 
-- **Trigger**: Push to `main` branch or manual trigger
-- **Build**: Automatically builds frontend and backend
-- **Deploy**: Deploys to GCP Compute Engine VM
-- **Verify**: Tests deployment success
-
-**Setup Instructions**: See [CICD_SETUP.md](./CICD_SETUP.md)
-
-### Manual Deployment
-
-For manual deployment to GCP:
-
-```bash
-# Quick deploy
-./quick-deploy-gcp.sh
-
-# Or use the detailed deployment script
-./deploy-gcp.sh <VM_IP>
-```
-
-**Deployment Guides**:
-- [GCP Deployment Guide](./GCP_DEPLOYMENT.md)
-- [AWS Deployment Guide](./AWS_DEPLOYMENT.md)
-- [Quick Start Guide](./QUICK_START.md)
-
-### Deployment Status
-
-Current deployment:
-- **Platform**: Google Cloud Platform (Compute Engine)
-- **Instance**: teecole-server (e2-small)
-- **Region**: us-central1-a
-- **IP**: 35.202.31.94
-- **Cost**: ~$15-20/month
-
-## �👨‍💻 Development
-
-Built with 20+ years of software development expertise, incorporating:
-- Modern React best practices
-- RESTful API design
-- Secure data handling
-- Performance optimization
-- Accessibility standards
-- SEO-friendly structure
-
----
 
 **Teecole Limited** - Building Excellence Since 2022
