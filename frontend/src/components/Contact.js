@@ -39,7 +39,7 @@ const Contact = () => {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:5001/api/contact', formData);
+      await axios.post('/api/contact', formData);
       setSnackbar({
         open: true,
         message: 'Thanks we will get back to you as quickly as possible',
