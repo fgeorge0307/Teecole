@@ -61,7 +61,7 @@ const AdminDashboard = () => {
 
   const fetchGallery = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/gallery');
+      const response = await axios.get('/api/gallery');
       setGallery(response.data);
     } catch (error) {
       console.error('Error fetching gallery:', error);
@@ -129,7 +129,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('adminToken');
       const response = await axios.post(
-        'http://localhost:5001/api/admin/upload',
+        '/api/admin/upload',
         uploadFormData,
         {
           headers: {
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
       if (uploadMethod === 'upload' && selectedFile) {
         const uploadedUrl = await handleUploadFile();
         if (!uploadedUrl) return; // Upload failed
-        imageUrl = `http://localhost:5001${uploadedUrl}`;
+        imageUrl = uploadedUrl;
       }
 
       // Validate image URL
@@ -173,14 +173,14 @@ const AdminDashboard = () => {
       
       if (editItem) {
         await axios.put(
-          `http://localhost:5001/api/admin/gallery/${editItem.id}`,
+          `/api/admin/gallery/${editItem.id}`,
           submitData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setSnackbar({ open: true, message: 'Gallery item updated successfully', severity: 'success' });
       } else {
         await axios.post(
-          'http://localhost:5001/api/admin/gallery',
+          '/api/admin/gallery',
           submitData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -203,10 +203,28 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
+      const itemToDelete = gallery.find(item => item.id === id);
+      
+      // Delete from database
       await axios.delete(
-        `http://localhost:5001/api/admin/gallery/${id}`,
+        `/api/admin/gallery/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+      // If the image was uploaded (not a URL), delete the file too
+      if (itemToDelete?.image_url && itemToDelete.image_url.startsWith('/uploads/')) {
+        const filename = itemToDelete.image_url.split('/').pop();
+        try {
+          await axios.delete(
+            `/api/admin/upload/${filename}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (fileError) {
+          console.error('Error deleting file:', fileError);
+          // Continue even if file deletion fails
+        }
+      }
+      
       setSnackbar({ open: true, message: 'Gallery item deleted successfully', severity: 'success' });
       fetchGallery();
     } catch (error) {
