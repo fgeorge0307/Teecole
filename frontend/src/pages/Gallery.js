@@ -214,11 +214,12 @@ const Gallery = () => {
             borderRadius: 3,
             overflow: 'hidden',
             m: 2,
+            maxHeight: 'calc(100vh - 64px)',
           },
         }}
       >
         {selectedImage && (
-          <Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 64px)' }}>
             <IconButton
               onClick={() => setSelectedImage(null)}
               sx={{
@@ -236,12 +237,14 @@ const Gallery = () => {
             <Box
               sx={{
                 width: '100%',
-                maxHeight: '70vh',
+                flex: '1',
+                minHeight: 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: '#f5f5f5',
                 overflow: 'hidden',
+                p: 2,
               }}
             >
               <Box
@@ -249,15 +252,14 @@ const Gallery = () => {
                 src={selectedImage.image_url}
                 alt={selectedImage.title}
                 sx={{
-                  width: '100%',
-                  height: '100%',
-                  maxHeight: '70vh',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
                   objectFit: 'contain',
                   display: 'block',
                 }}
               />
             </Box>
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ p: 3, flexShrink: 0 }}>
               <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
                 {selectedImage.title}
               </Typography>
