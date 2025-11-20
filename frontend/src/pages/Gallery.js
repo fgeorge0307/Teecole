@@ -320,13 +320,10 @@ const Gallery = () => {
                   : selectedImage.image_url}
                 alt={selectedImage.title}
                 sx={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
                   display: 'block',
-                  borderRadius: 2,
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  p: 2,
                 }}
               />
 
