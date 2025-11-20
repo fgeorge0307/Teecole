@@ -207,25 +207,27 @@ const Gallery = () => {
         onClose={() => setSelectedImage(null)}
         maxWidth="lg"
         fullWidth
+        scroll="body"
         PaperProps={{
           sx: {
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
             borderRadius: 3,
-            overflow: 'hidden',
             m: 2,
-            maxHeight: 'calc(100vh - 64px)',
+            maxHeight: 'calc(100vh - 32px)',
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
       >
         {selectedImage && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 64px)' }}>
+          <>
             <IconButton
               onClick={() => setSelectedImage(null)}
               sx={{
                 position: 'absolute',
-                top: 16,
-                right: 16,
+                top: 8,
+                right: 8,
                 background: 'rgba(0, 0, 0, 0.5)',
                 color: 'white',
                 '&:hover': { background: 'rgba(0, 0, 0, 0.7)' },
@@ -237,14 +239,13 @@ const Gallery = () => {
             <Box
               sx={{
                 width: '100%',
-                flex: '1',
-                minHeight: 0,
+                maxHeight: '60vh',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: '#f5f5f5',
-                overflow: 'hidden',
-                p: 2,
+                p: 3,
+                flexShrink: 0,
               }}
             >
               <Box
@@ -253,13 +254,13 @@ const Gallery = () => {
                 alt={selectedImage.title}
                 sx={{
                   maxWidth: '100%',
-                  maxHeight: '100%',
+                  maxHeight: '60vh',
                   objectFit: 'contain',
                   display: 'block',
                 }}
               />
             </Box>
-            <Box sx={{ p: 3, flexShrink: 0 }}>
+            <Box sx={{ p: 3, overflow: 'auto', flexShrink: 0 }}>
               <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
                 {selectedImage.title}
               </Typography>
@@ -274,7 +275,7 @@ const Gallery = () => {
                 />
               </Box>
             </Box>
-          </Box>
+          </>
         )}
       </Dialog>
     </Box>
