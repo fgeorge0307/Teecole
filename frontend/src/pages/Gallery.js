@@ -213,17 +213,18 @@ const Gallery = () => {
             backdropFilter: 'blur(20px)',
             borderRadius: 3,
             overflow: 'hidden',
+            m: 2,
           },
         }}
       >
         {selectedImage && (
-          <Box sx={{ position: 'relative', overflow: 'hidden' }}>
+          <Box>
             <IconButton
               onClick={() => setSelectedImage(null)}
               sx={{
                 position: 'absolute',
-                top: 8,
-                right: 8,
+                top: 16,
+                right: 16,
                 background: 'rgba(0, 0, 0, 0.5)',
                 color: 'white',
                 '&:hover': { background: 'rgba(0, 0, 0, 0.7)' },
@@ -233,16 +234,29 @@ const Gallery = () => {
               <CloseIcon />
             </IconButton>
             <Box
-              component="img"
-              src={selectedImage.image_url}
-              alt={selectedImage.title}
               sx={{
                 width: '100%',
                 maxHeight: '70vh',
-                objectFit: 'contain',
-                display: 'block',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+                overflow: 'hidden',
               }}
-            />
+            >
+              <Box
+                component="img"
+                src={selectedImage.image_url}
+                alt={selectedImage.title}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  maxHeight: '70vh',
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
+            </Box>
             <Box sx={{ p: 3 }}>
               <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
                 {selectedImage.title}
