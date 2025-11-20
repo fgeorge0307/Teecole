@@ -40,7 +40,7 @@ const AdminDashboard = () => {
   const [editItem, setEditItem] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [uploadMethod, setUploadMethod] = useState('url'); // 'url' or 'upload'
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -92,103 +92,158 @@ const AdminDashboard = () => {
       });
       setUploadMethod('url');
     }
-    setSelectedFile(null);
+    setSelectedFiles([]);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setEditItem(null);
-    setSelectedFile(null);
+    setSelectedFiles([]);
   };
 
   const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    // Validate files
+    const validFiles = [];
+    for (const file of files) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        setSnackbar({ open: true, message: 'Please select an image file', severity: 'error' });
-        return;
+        setSnackbar({ open: true, message: `${file.name} is not an image file`, severity: 'error' });
+        continue;
       }
       // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setSnackbar({ open: true, message: 'File size must be less than 5MB', severity: 'error' });
-        return;
+        setSnackbar({ open: true, message: `${file.name} exceeds 5MB limit`, severity: 'error' });
+        continue;
       }
-      setSelectedFile(file);
+      validFiles.push(file);
     }
+    
+    setSelectedFiles(validFiles);
   };
 
-  const handleUploadFile = async () => {
-    if (!selectedFile) return null;
+  const handleUploadFiles = async () => {
+    if (selectedFiles.length === 0) return [];
 
     setUploading(true);
-    const uploadFormData = new FormData();
-    uploadFormData.append('image', selectedFile);
+    const uploadedUrls = [];
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await axios.post(
-        '/api/admin/upload',
-        uploadFormData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      
+      for (const file of selectedFiles) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('image', file);
+
+        const response = await axios.post(
+          '/api/admin/upload',
+          uploadFormData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+        uploadedUrls.push(response.data.url);
+      }
+      
       setUploading(false);
-      return response.data.url;
+      return uploadedUrls;
     } catch (error) {
       setUploading(false);
       setSnackbar({
         open: true,
-        message: error.response?.data?.error || 'Failed to upload image',
+        message: error.response?.data?.error || 'Failed to upload images',
         severity: 'error',
       });
-      return null;
+      return [];
     }
   };
 
   const handleSubmit = async () => {
     try {
-      let imageUrl = formData.image_url;
-
-      // If upload method and file selected, upload it first
-      if (uploadMethod === 'upload' && selectedFile) {
-        const uploadedUrl = await handleUploadFile();
-        if (!uploadedUrl) return; // Upload failed
-        imageUrl = uploadedUrl;
-      }
-
-      // Validate image URL
-      if (!imageUrl) {
-        setSnackbar({ open: true, message: 'Please provide an image', severity: 'error' });
-        return;
-      }
-
-      const submitData = { ...formData, image_url: imageUrl };
       const token = localStorage.getItem('adminToken');
-      
+
+      // If editing, handle single image update
       if (editItem) {
+        let imageUrl = formData.image_url;
+
+        // If upload method and file selected, upload it first
+        if (uploadMethod === 'upload' && selectedFiles.length > 0) {
+          const uploadedUrls = await handleUploadFiles();
+          if (uploadedUrls.length === 0) return; // Upload failed
+          imageUrl = uploadedUrls[0];
+        }
+
+        // Validate image URL
+        if (!imageUrl) {
+          setSnackbar({ open: true, message: 'Please provide an image', severity: 'error' });
+          return;
+        }
+
+        const submitData = { ...formData, image_url: imageUrl };
+        
         await axios.put(
           `/api/admin/gallery/${editItem.id}`,
           submitData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setSnackbar({ open: true, message: 'Gallery item updated successfully', severity: 'success' });
+        fetchGallery();
+        handleCloseDialog();
       } else {
-        await axios.post(
-          '/api/admin/gallery',
-          submitData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setSnackbar({ open: true, message: 'Gallery item added successfully', severity: 'success' });
+        // Adding new items - support multiple images
+        if (uploadMethod === 'upload' && selectedFiles.length > 0) {
+          const uploadedUrls = await handleUploadFiles();
+          if (uploadedUrls.length === 0) return; // Upload failed
+
+          // Create a gallery item for each uploaded image
+          let successCount = 0;
+          for (let i = 0; i < uploadedUrls.length; i++) {
+            const submitData = {
+              ...formData,
+              image_url: uploadedUrls[i],
+              title: selectedFiles.length > 1 ? `${formData.title} ${i + 1}` : formData.title,
+            };
+
+            try {
+              await axios.post(
+                '/api/admin/gallery',
+                submitData,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              successCount++;
+            } catch (error) {
+              console.error('Error uploading image:', error);
+            }
+          }
+
+          setSnackbar({ 
+            open: true, 
+            message: `${successCount} image${successCount > 1 ? 's' : ''} uploaded successfully`, 
+            severity: 'success' 
+          });
+        } else if (uploadMethod === 'url' && formData.image_url) {
+          // Single URL upload
+          const submitData = { ...formData };
+          await axios.post(
+            '/api/admin/gallery',
+            submitData,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setSnackbar({ open: true, message: 'Gallery item added successfully', severity: 'success' });
+        } else {
+          setSnackbar({ open: true, message: 'Please provide an image', severity: 'error' });
+          return;
+        }
+
+        fetchGallery();
+        handleCloseDialog();
       }
-      
-      fetchGallery();
-      handleCloseDialog();
     } catch (error) {
       setSnackbar({ 
         open: true, 
@@ -430,6 +485,7 @@ const AdminDashboard = () => {
                 style={{ display: 'none' }}
                 id="image-upload-input"
                 type="file"
+                multiple={!editItem}
                 onChange={handleFileSelect}
               />
               <label htmlFor="image-upload-input">
@@ -440,24 +496,52 @@ const AdminDashboard = () => {
                   startIcon={<AddPhotoAlternateIcon />}
                   sx={{ py: 1.5 }}
                 >
-                  {selectedFile ? selectedFile.name : 'Choose Image'}
+                  {selectedFiles.length > 0 
+                    ? `${selectedFiles.length} image${selectedFiles.length > 1 ? 's' : ''} selected` 
+                    : editItem ? 'Choose Image' : 'Choose Images'}
                 </Button>
               </label>
-              {selectedFile && (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                  <img
-                    src={URL.createObjectURL(selectedFile)}
-                    alt="Preview"
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '200px',
-                      borderRadius: '8px',
-                      objectFit: 'contain'
-                    }}
-                  />
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </Typography>
+              {selectedFiles.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Grid container spacing={2}>
+                    {selectedFiles.map((file, index) => (
+                      <Grid item xs={6} sm={4} key={index}>
+                        <Box sx={{ position: 'relative', textAlign: 'center' }}>
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ${index + 1}`}
+                            style={{
+                              width: '100%',
+                              height: '100px',
+                              borderRadius: '8px',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <IconButton
+                            size="small"
+                            onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== index))}
+                            sx={{
+                              position: 'absolute',
+                              top: -8,
+                              right: -8,
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              '&:hover': { background: 'rgba(255, 255, 255, 1)' },
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                  {!editItem && selectedFiles.length > 1 && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+                      Note: Multiple images will be uploaded with numbered titles
+                    </Typography>
+                  )}
                 </Box>
               )}
             </Box>
@@ -503,7 +587,7 @@ const AdminDashboard = () => {
           <Button
             onClick={handleSubmit}
             variant="contained"
-            disabled={uploading || !formData.title || (uploadMethod === 'url' && !formData.image_url) || (uploadMethod === 'upload' && !selectedFile)}
+            disabled={uploading || !formData.title || (uploadMethod === 'url' && !formData.image_url) || (uploadMethod === 'upload' && selectedFiles.length === 0)}
           >
             {uploading ? 'Uploading...' : editItem ? 'Update' : 'Add'}
           </Button>
