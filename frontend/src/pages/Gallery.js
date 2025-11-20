@@ -17,6 +17,9 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import CloseIcon from '@mui/icons-material/Close';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import axios from 'axios';
 
 const Gallery = () => {
@@ -26,6 +29,7 @@ const Gallery = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedImage, setSelectedImage] = useState(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     fetchGallery();
@@ -160,15 +164,41 @@ const Gallery = () => {
                         boxShadow: '0 12px 24px rgba(103, 80, 164, 0.2)',
                       },
                     }}
-                    onClick={() => setSelectedImage(item)}
+                    onClick={() => {
+                      setSelectedImage(item);
+                      setCurrentImageIndex(0);
+                    }}
                   >
-                    <CardMedia
-                      component="img"
-                      height="250"
-                      image={item.image_url}
-                      alt={item.title}
-                      sx={{ objectFit: 'cover' }}
-                    />
+                    <Box sx={{ position: 'relative' }}>
+                      <CardMedia
+                        component="img"
+                        height="250"
+                        image={item.images && item.images[0] ? item.images[0] : item.image_url}
+                        alt={item.title}
+                        sx={{ objectFit: 'cover' }}
+                      />
+                      {item.images && item.images.length > 1 && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            background: 'rgba(0, 0, 0, 0.6)',
+                            color: 'white',
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: 1,
+                            fontSize: '0.75rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                          }}
+                        >
+                          <AddPhotoAlternateIcon sx={{ fontSize: 16 }} />
+                          {item.images.length}
+                        </Box>
+                      )}
+                    </Box>
                     <CardContent>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
@@ -209,6 +239,7 @@ const Gallery = () => {
         onClose={() => {
           setSelectedImage(null);
           setShowFullDescription(false);
+          setCurrentImageIndex(0);
         }}
         maxWidth="lg"
         fullWidth
@@ -230,6 +261,7 @@ const Gallery = () => {
               onClick={() => {
                 setSelectedImage(null);
                 setShowFullDescription(false);
+                setCurrentImageIndex(0);
               }}
               sx={{
                 position: 'absolute',
@@ -243,8 +275,11 @@ const Gallery = () => {
             >
               <CloseIcon />
             </IconButton>
+            
+            {/* Image Carousel Container */}
             <Box
               sx={{
+                position: 'relative',
                 width: '100%',
                 height: '500px',
                 minHeight: '500px',
@@ -253,13 +288,36 @@ const Gallery = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: '#f5f5f5',
-                p: 2,
                 flexShrink: 0,
+                overflow: 'hidden',
               }}
             >
+              {/* Previous Button */}
+              {selectedImage.images && selectedImage.images.length > 1 && (
+                <IconButton
+                  onClick={() => setCurrentImageIndex((prev) => 
+                    prev === 0 ? selectedImage.images.length - 1 : prev - 1
+                  )}
+                  sx={{
+                    position: 'absolute',
+                    left: 16,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    '&:hover': { background: 'rgba(255, 255, 255, 1)' },
+                    zIndex: 2,
+                  }}
+                >
+                  <ChevronLeftIcon />
+                </IconButton>
+              )}
+
+              {/* Image */}
               <Box
                 component="img"
-                src={selectedImage.image_url}
+                src={selectedImage.images && selectedImage.images[currentImageIndex] 
+                  ? selectedImage.images[currentImageIndex] 
+                  : selectedImage.image_url}
                 alt={selectedImage.title}
                 sx={{
                   maxWidth: '100%',
@@ -268,9 +326,52 @@ const Gallery = () => {
                   display: 'block',
                   borderRadius: 2,
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  p: 2,
                 }}
               />
+
+              {/* Next Button */}
+              {selectedImage.images && selectedImage.images.length > 1 && (
+                <IconButton
+                  onClick={() => setCurrentImageIndex((prev) => 
+                    prev === selectedImage.images.length - 1 ? 0 : prev + 1
+                  )}
+                  sx={{
+                    position: 'absolute',
+                    right: 16,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    '&:hover': { background: 'rgba(255, 255, 255, 1)' },
+                    zIndex: 2,
+                  }}
+                >
+                  <ChevronRightIcon />
+                </IconButton>
+              )}
+
+              {/* Image Counter */}
+              {selectedImage.images && selectedImage.images.length > 1 && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 16,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(0, 0, 0, 0.6)',
+                    color: 'white',
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 2,
+                    fontSize: '0.875rem',
+                    zIndex: 2,
+                  }}
+                >
+                  {currentImageIndex + 1} / {selectedImage.images.length}
+                </Box>
+              )}
             </Box>
+
             <Box sx={{ p: 3, flexShrink: 0, maxHeight: showFullDescription ? '300px' : 'auto', overflowY: showFullDescription ? 'auto' : 'visible' }}>
               <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
                 {selectedImage.title}

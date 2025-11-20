@@ -92,6 +92,24 @@ const initializeDatabase = () => {
       console.log('Gallery table ready');
     }
   });
+
+  // Create gallery_images table for multiple images per property
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gallery_images (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      gallery_id INTEGER NOT NULL,
+      image_url TEXT NOT NULL,
+      display_order INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (gallery_id) REFERENCES gallery(id) ON DELETE CASCADE
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating gallery_images table:', err.message);
+    } else {
+      console.log('Gallery images table ready');
+    }
+  });
 };
 
 const seedServices = () => {

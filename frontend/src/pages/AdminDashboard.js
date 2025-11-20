@@ -168,15 +168,17 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('adminToken');
 
-      // If editing, handle single image update
+      // If editing, handle single or multiple image update
       if (editItem) {
         let imageUrl = formData.image_url;
+        let additionalImages = [];
 
-        // If upload method and file selected, upload it first
+        // If upload method and files selected, upload them first
         if (uploadMethod === 'upload' && selectedFiles.length > 0) {
           const uploadedUrls = await handleUploadFiles();
           if (uploadedUrls.length === 0) return; // Upload failed
           imageUrl = uploadedUrls[0];
+          additionalImages = uploadedUrls;
         }
 
         // Validate image URL
@@ -185,7 +187,11 @@ const AdminDashboard = () => {
           return;
         }
 
-        const submitData = { ...formData, image_url: imageUrl };
+        const submitData = { 
+          ...formData, 
+          image_url: imageUrl,
+          images: additionalImages.length > 0 ? additionalImages : undefined
+        };
         
         await axios.put(
           `/api/admin/gallery/${editItem.id}`,
@@ -201,30 +207,22 @@ const AdminDashboard = () => {
           const uploadedUrls = await handleUploadFiles();
           if (uploadedUrls.length === 0) return; // Upload failed
 
-          // Create a gallery item for each uploaded image
-          let successCount = 0;
-          for (let i = 0; i < uploadedUrls.length; i++) {
-            const submitData = {
-              ...formData,
-              image_url: uploadedUrls[i],
-              title: selectedFiles.length > 1 ? `${formData.title} ${i + 1}` : formData.title,
-            };
+          // Create a single gallery item with multiple images
+          const submitData = {
+            ...formData,
+            image_url: uploadedUrls[0],
+            images: uploadedUrls
+          };
 
-            try {
-              await axios.post(
-                '/api/admin/gallery',
-                submitData,
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-              successCount++;
-            } catch (error) {
-              console.error('Error uploading image:', error);
-            }
-          }
+          await axios.post(
+            '/api/admin/gallery',
+            submitData,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
 
           setSnackbar({ 
             open: true, 
-            message: `${successCount} image${successCount > 1 ? 's' : ''} uploaded successfully`, 
+            message: `Gallery item with ${uploadedUrls.length} image${uploadedUrls.length > 1 ? 's' : ''} added successfully`, 
             severity: 'success' 
           });
         } else if (uploadMethod === 'url' && formData.image_url) {
