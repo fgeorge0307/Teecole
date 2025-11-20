@@ -12,6 +12,7 @@ import {
   Tab,
   Dialog,
   IconButton,
+  Button,
   useTheme,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +25,7 @@ const Gallery = () => {
   const [filteredGallery, setFilteredGallery] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedImage, setSelectedImage] = useState(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   useEffect(() => {
     fetchGallery();
@@ -204,7 +206,10 @@ const Gallery = () => {
 
       <Dialog
         open={Boolean(selectedImage)}
-        onClose={() => setSelectedImage(null)}
+        onClose={() => {
+          setSelectedImage(null);
+          setShowFullDescription(false);
+        }}
         maxWidth="lg"
         fullWidth
         scroll="body"
@@ -223,7 +228,10 @@ const Gallery = () => {
         {selectedImage && (
           <>
             <IconButton
-              onClick={() => setSelectedImage(null)}
+              onClick={() => {
+                setSelectedImage(null);
+                setShowFullDescription(false);
+              }}
               sx={{
                 position: 'absolute',
                 top: 8,
@@ -260,13 +268,42 @@ const Gallery = () => {
                 }}
               />
             </Box>
-            <Box sx={{ p: 3, overflow: 'auto', flexShrink: 0 }}>
+            <Box sx={{ p: 3, flexShrink: 0 }}>
               <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
                 {selectedImage.title}
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography 
+                variant="body1" 
+                color="text.secondary" 
+                sx={{ 
+                  mb: 2,
+                  display: '-webkit-box',
+                  WebkitLineClamp: showFullDescription ? 'unset' : 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: showFullDescription ? 'visible' : 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 {selectedImage.description}
               </Typography>
+              {selectedImage.description && selectedImage.description.split(' ').length > 50 && (
+                <Button
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  sx={{ 
+                    mb: 2, 
+                    textTransform: 'none',
+                    color: theme.palette.primary.main,
+                    p: 0,
+                    minWidth: 'auto',
+                    '&:hover': {
+                      background: 'transparent',
+                      textDecoration: 'underline',
+                    }
+                  }}
+                >
+                  {showFullDescription ? 'Show less' : 'Show more'}
+                </Button>
+              )}
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Chip label={selectedImage.category} color="primary" />
                 <Chip
