@@ -212,21 +212,20 @@ const Gallery = () => {
         }}
         maxWidth="lg"
         fullWidth
-        scroll="body"
         PaperProps={{
           sx: {
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
             borderRadius: 3,
             m: 2,
+            height: 'auto',
             maxHeight: 'calc(100vh - 32px)',
-            display: 'flex',
-            flexDirection: 'column',
+            overflow: 'hidden',
           },
         }}
       >
         {selectedImage && (
-          <>
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <IconButton
               onClick={() => {
                 setSelectedImage(null);
@@ -247,12 +246,14 @@ const Gallery = () => {
             <Box
               sx={{
                 width: '100%',
-                maxHeight: '60vh',
+                height: '500px',
+                minHeight: '500px',
+                maxHeight: '500px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: '#f5f5f5',
-                p: 3,
+                p: 2,
                 flexShrink: 0,
               }}
             >
@@ -262,13 +263,13 @@ const Gallery = () => {
                 alt={selectedImage.title}
                 sx={{
                   maxWidth: '100%',
-                  maxHeight: '60vh',
+                  maxHeight: '100%',
                   objectFit: 'contain',
                   display: 'block',
                 }}
               />
             </Box>
-            <Box sx={{ p: 3, flexShrink: 0 }}>
+            <Box sx={{ p: 3, flexShrink: 0, maxHeight: showFullDescription ? '300px' : 'auto', overflowY: showFullDescription ? 'auto' : 'visible' }}>
               <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
                 {selectedImage.title}
               </Typography>
@@ -312,7 +313,7 @@ const Gallery = () => {
                 />
               </Box>
             </Box>
-          </>
+          </Box>
         )}
       </Dialog>
     </Box>
