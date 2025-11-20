@@ -212,11 +212,12 @@ const Gallery = () => {
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
             borderRadius: 3,
+            overflow: 'hidden',
           },
         }}
       >
         {selectedImage && (
-          <Box sx={{ position: 'relative' }}>
+          <Box sx={{ position: 'relative', overflow: 'hidden' }}>
             <IconButton
               onClick={() => setSelectedImage(null)}
               sx={{
@@ -239,6 +240,7 @@ const Gallery = () => {
                 width: '100%',
                 maxHeight: '70vh',
                 objectFit: 'contain',
+                display: 'block',
               }}
             />
             <Box sx={{ p: 3 }}>
