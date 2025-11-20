@@ -208,9 +208,36 @@ const Gallery = () => {
                           <Chip label="Featured" size="small" color="primary" />
                         )}
                       </Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary" 
+                        sx={{ 
+                          mb: 1.5,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
                         {item.description}
                       </Typography>
+                      {item.description && item.description.length > 100 && (
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: theme.palette.primary.main,
+                            cursor: 'pointer',
+                            display: 'block',
+                            mb: 1,
+                            '&:hover': {
+                              textDecoration: 'underline',
+                            }
+                          }}
+                        >
+                          Show more
+                        </Typography>
+                      )}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Chip label={item.category} size="small" variant="outlined" />
                         <Typography variant="caption" color="text.secondary">
