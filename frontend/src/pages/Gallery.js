@@ -39,7 +39,7 @@ const Gallery = () => {
 
   const fetchGallery = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/gallery');
+      const response = await axios.get('/api/gallery');
       setGallery(response.data);
       setFilteredGallery(response.data);
     } catch (error) {
